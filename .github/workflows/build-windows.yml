@@ -43,6 +43,9 @@ jobs:
         run: |
           dist\WaraqPDF.exe info tests\_fixtures\english_50p.pdf > info.txt
           type info.txt
+          findstr /C:"pages" info.txt || exit /b 1
+          dist\WaraqPDF.exe totext tests\_fixtures\arabic_reportlab.pdf > ar.txt
+          findstr /C:"PDF" ar.txt || exit /b 1
         shell: cmd
 
       - uses: actions/upload-artifact@v4

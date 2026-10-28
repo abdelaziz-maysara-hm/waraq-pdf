@@ -18,7 +18,18 @@ def _p(msg):
     print(msg, flush=True)
 
 
+def _utf8_streams():
+    """Windows consoles/pipes default to a legacy code page (e.g. cp1252) that can't encode Arabic."""
+    for s in (sys.stdout, sys.stderr):
+        try:
+            if s is not None and (s.encoding or "").lower().replace("-", "") != "utf8":
+                s.reconfigure(encoding="utf-8", errors="replace")
+        except Exception:
+            pass
+
+
 def main(argv=None) -> int:
+    _utf8_streams()
     import logging
     logging.getLogger("pypdf").setLevel(logging.ERROR)
     ap = argparse.ArgumentParser(prog="waraq", description="Waraq PDF - offline Arabic-first PDF toolbox")
