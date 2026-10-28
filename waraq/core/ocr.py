@@ -176,7 +176,7 @@ class WindowsOcrEngine:
         im.save(buf, "PNG")
         stream = InMemoryRandomAccessStream()
         writer = DataWriter(stream)
-        writer.write_bytes(list(buf.getvalue()))
+        writer.write_bytes(buf.getvalue())  # bytes is a buffer; a list is rejected by pywinrt
         await writer.store_async()
         await writer.flush_async()
         writer.detach_stream()

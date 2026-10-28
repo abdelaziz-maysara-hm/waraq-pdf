@@ -63,14 +63,18 @@ jobs:
 
       - name: Windows Arabic OCR with the exe (informational)
         continue-on-error: true
-        timeout-minutes: 25
+        timeout-minutes: 30
         shell: pwsh
         run: |
           Get-WindowsCapability -Online -Name "Language.OCR*ar*" | Format-Table Name, State
           $sw = [Diagnostics.Stopwatch]::StartNew()
           Add-WindowsCapability -Online -Name "Language.OCR~~~ar-SA~0.0.1.0"
           "capability install took $($sw.Elapsed.TotalMinutes) min"
-          cmd /c "dist\WaraqPDF.exe ocr tests\_fixtures\arabic_scanned.pdf --engine windows --lang ara -o ocr_win.txt"
+          # source first (shows the traceback in the log), then the frozen exe with a hard timeout:
+          # a crash in the windowed exe opens an error dialog that would otherwise block forever
+          python -c "from waraq.core import ocr; e=ocr.get_engine('windows'); print(ocr.ocr_pdf('tests/_fixtures/arabic_scanned.pdf', engine=e, langs='ara', pages='1')[0][:300])"
+          $p = Start-Process -FilePath dist\WaraqPDF.exe -ArgumentList "ocr", "tests\_fixtures\arabic_scanned.pdf", "--engine", "windows", "--lang", "ara", "-o", "ocr_win.txt" -PassThru
+          if (-not $p.WaitForExit(180000)) { Stop-Process -Id $p.Id -Force; throw "exe OCR timed out (probably an error dialog)" }
           $t = Get-Content ocr_win.txt -Raw -Encoding utf8
           $t.Substring(0, [Math]::Min(400, $t.Length))
           if ($t -notmatch "برنامج") { throw "Arabic OCR text not as expected" }
