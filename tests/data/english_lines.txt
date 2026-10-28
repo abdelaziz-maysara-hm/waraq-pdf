@@ -1,0 +1,3 @@
+Waraq PDF is a free offline PDF toolbox.
+It merges, splits, compresses and converts files.
+Version 0.1.0 released on 2026-10-28.
