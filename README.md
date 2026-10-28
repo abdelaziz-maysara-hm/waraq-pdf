@@ -69,4 +69,4 @@ tests on `windows-latest` and uploads `WaraqPDF.exe` as an artifact.
 ### Status
 
 Version 0.1.0, MVP. See [MANUAL.md](MANUAL.md#limitations) for known
-limitations. Licence: **not chosen yet**, see [LICENSE-NOTE.md](LICENSE-NOTE.md).
+limitations. Licence: **MIT** (see [LICENSE](LICENSE)). Third-party licences: [LICENSE-NOTE.md](LICENSE-NOTE.md).

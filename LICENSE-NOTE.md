@@ -1,10 +1,8 @@
-# Licence — to be decided by the owner
+# Licences
 
-No licence has been chosen for Waraq's own code yet, so for now all rights are
-reserved. Pick one before publishing. Common choices are MIT or Apache-2.0 (permissive) and
-GPL-3.0 (copyleft). Then add a `LICENSE` file.
+Waraq PDF's own code is released under the **MIT License** (see [LICENSE](LICENSE)).
 
-All dependencies were picked so that any of those choices stays possible.
+The third-party components below keep their own licences.
 **No AGPL code is used.** PyMuPDF and Ghostscript were deliberately avoided.
 
 | component | licence | notes |
@@ -18,7 +16,7 @@ All dependencies were picked so that any of those choices stays possible.
 | reportlab | BSD-3-Clause | |
 | customtkinter | MIT | |
 | arabic-reshaper | MIT | |
-| python-bidi | LGPL-3.0 | used as a separate, replaceable module. In a PyInstaller one-file exe, LGPL compliance is best met by also offering the source/object files or building in one-folder mode |
+| python-bidi | LGPL-3.0 | used as a separate, replaceable module. The Windows build is a PyInstaller one-file exe. python-bidi is unmodified and its source is at https://github.com/MeirKriheli/python-bidi; to replace it, rebuild from this repository with your own copy (all build steps are in `.github/workflows/build-windows.yml`) |
 | winrt (pywinrt) | MIT | Windows OCR |
 | Tesseract (optional, not bundled) | Apache-2.0 | |
 | Amiri font (bundled in `waraq/assets/fonts`) | SIL OFL 1.1 | may be bundled; keep the OFL text with it and don't sell the font by itself |
