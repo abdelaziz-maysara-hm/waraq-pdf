@@ -48,6 +48,25 @@ jobs:
           findstr /C:"PDF" ar.txt || exit /b 1
         shell: cmd
 
+      - name: GUI start check (window must stay alive 20 s)
+        shell: pwsh
+        run: |
+          $g = Start-Process -FilePath dist\WaraqPDF.exe -PassThru
+          Start-Sleep -Seconds 20
+          if ($g.HasExited) { throw "GUI exited early with code $($g.ExitCode)" }
+          Stop-Process -Id $g.Id
+
+      - name: Windows Arabic OCR with the exe (informational)
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          Get-WindowsCapability -Online -Name "Language.OCR*ar*" | Format-Table Name, State
+          Add-WindowsCapability -Online -Name "Language.OCR~~~ar-SA~0.0.1.0"
+          cmd /c "dist\WaraqPDF.exe ocr tests\_fixtures\arabic_scanned.pdf --engine windows --lang ara -o ocr_win.txt"
+          $t = Get-Content ocr_win.txt -Raw -Encoding utf8
+          $t.Substring(0, [Math]::Min(400, $t.Length))
+          if ($t -notmatch "برنامج") { throw "Arabic OCR text not as expected" }
+
       - uses: actions/upload-artifact@v4
         with:
           name: WaraqPDF-windows
