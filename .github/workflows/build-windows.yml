@@ -35,7 +35,7 @@ jobs:
       - name: Build one-file exe
         run: >
           pyinstaller --noconfirm --onefile --windowed --name WaraqPDF
-          --collect-all customtkinter --collect-all pypdfium2 --collect-submodules winrt
+          --collect-all customtkinter --collect-all pypdfium2 --collect-all tkinterdnd2 --collect-submodules winrt
           --add-data "waraq/assets;waraq/assets"
           waraq_app.py
 
@@ -49,12 +49,52 @@ jobs:
         shell: cmd
 
       - name: GUI start check (window must stay alive 20 s)
+        timeout-minutes: 3
         shell: pwsh
         run: |
           $g = Start-Process -FilePath dist\WaraqPDF.exe -PassThru
           Start-Sleep -Seconds 20
           if ($g.HasExited) { throw "GUI exited early with code $($g.ExitCode)" }
-          Stop-Process -Id $g.Id
+          Stop-Process -Id $g.Id -Force
+
+      - name: Open a PDF with the exe (double-click path) + desktop screenshot
+        timeout-minutes: 3
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          $g = Start-Process -FilePath dist\WaraqPDF.exe -ArgumentList "tests\_fixtures\arabic_book_240p.pdf" -PassThru
+          Start-Sleep -Seconds 25
+          New-Item -ItemType Directory -Force -Path win_shots | Out-Null
+          Add-Type -AssemblyName System.Windows.Forms, System.Drawing
+          $b = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+          $bmp = New-Object System.Drawing.Bitmap $b.Width, $b.Height
+          $gr = [System.Drawing.Graphics]::FromImage($bmp)
+          $gr.CopyFromScreen($b.Location, [System.Drawing.Point]::Empty, $b.Size)
+          $bmp.Save("win_shots\exe_open_pdf.png")
+          $alive = -not $g.HasExited
+          if ($alive) { Stop-Process -Id $g.Id -Force }
+          if (-not $alive) { throw "exe exited while opening a PDF (code $($g.ExitCode))" }
+
+      - name: Viewer/editor GUI drive from source (informational, Windows rendering)
+        timeout-minutes: 10
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          $env:PYTHONIOENCODING = "utf-8"
+          $p = Start-Process -FilePath python -ArgumentList "tests\gui_viewer_drive.py" -PassThru -NoNewWindow -RedirectStandardOutput drive.txt -RedirectStandardError drive_err.txt
+          if (-not $p.WaitForExit(480000)) { Stop-Process -Id $p.Id -Force; "gui drive timed out" }
+          Get-Content drive.txt -Encoding utf8
+          Get-Content drive_err.txt -Encoding utf8 | Select-Object -Last 40
+          New-Item -ItemType Directory -Force -Path win_shots | Out-Null
+          Copy-Item docs\screenshots\v_*.png win_shots\ -ErrorAction SilentlyContinue
+          if ($p.ExitCode -ne 0) { throw "gui drive failed" }
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: windows-screenshots
+          path: win_shots/
+          if-no-files-found: ignore
 
       - uses: actions/upload-artifact@v4
         with:
