@@ -55,7 +55,7 @@ jobs:
           $g = Start-Process -FilePath dist\WaraqPDF.exe -PassThru
           Start-Sleep -Seconds 20
           if ($g.HasExited) { throw "GUI exited early with code $($g.ExitCode)" }
-          Stop-Process -Id $g.Id -Force
+          taskkill /PID $g.Id /T /F | Out-Null
 
       - name: Open a PDF with the exe (double-click path) + desktop screenshot
         timeout-minutes: 3
@@ -72,7 +72,7 @@ jobs:
           $gr.CopyFromScreen($b.Location, [System.Drawing.Point]::Empty, $b.Size)
           $bmp.Save("win_shots\exe_open_pdf.png")
           $alive = -not $g.HasExited
-          if ($alive) { Stop-Process -Id $g.Id -Force }
+          if ($alive) { taskkill /PID $g.Id /T /F | Out-Null }
           if (-not $alive) { throw "exe exited while opening a PDF (code $($g.ExitCode))" }
 
       - name: Viewer/editor GUI drive from source (informational, Windows rendering)
