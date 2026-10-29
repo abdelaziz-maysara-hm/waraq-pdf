@@ -334,7 +334,9 @@ def run_en():
         v.select_text(0, s, len(w)); v._markup_from_selection(kind)
     v.set_tool("freetext")
     app.test_answers.append({"text": "Reviewed - تمت المراجعة", "size": 14, "family": "sans"})
-    drag(v, 0, (40, 810), (300, 775))
+    drag(v, 0, (40, 75), (300, 40))         # bottom margin: fits A4 and Letter
+    check("en Arabic free text placed", not app.test_answers and
+          any(a.kind == "freetext" for a in v.doc.pages[0].annots), str(app.test_answers))
     v.set_tool("select"); v._select(None)
     v.set_fit("page"); settle(app, v)
     shot(app, "v_en_01_viewer")

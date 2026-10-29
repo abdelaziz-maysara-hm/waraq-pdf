@@ -348,7 +348,7 @@ class App(_Base):
         v = d["view"]
         if ask and d["doc"].dirty:
             ans = self._ask_unsaved(d["doc"].name)
-            if ans is None:
+            if ans not in ("save", "discard"):        # Cancel / closed dialog
                 return False
             if ans == "save" and not v.save():
                 return False
