@@ -4,6 +4,8 @@ from pathlib import Path
 
 
 def settings_path() -> Path:
+    if os.environ.get("WARAQ_SETTINGS_DIR"):          # tests / portable use
+        return Path(os.environ["WARAQ_SETTINGS_DIR"]) / "settings.json"
     if os.name == "nt":
         base = Path(os.environ.get("APPDATA", Path.home()))
     else:
@@ -11,7 +13,7 @@ def settings_path() -> Path:
     return base / "Waraq" / "settings.json"
 
 
-DEFAULTS = {"lang": "ar", "theme": "dark", "shaping": None, "last_dir": ""}
+DEFAULTS = {"lang": "ar", "theme": "dark", "shaping": None, "last_dir": "", "recent": []}
 
 
 def load() -> dict:

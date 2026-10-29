@@ -148,6 +148,10 @@ S = {
               "الإصدار {v} - كل المعالجة تتم على جهازك."),
 }
 
+from .strings_viewer import VIEWER as _VIEWER  # noqa: E402
+
+S.update(_VIEWER)
+
 _LANG = "ar"
 _FORCE_SHAPING = None  # None = automatic
 

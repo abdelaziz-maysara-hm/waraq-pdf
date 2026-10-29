@@ -16,3 +16,4 @@ winrt-Windows.Graphics.Imaging>=2.0; sys_platform == "win32"
 winrt-Windows.Storage.Streams>=2.0; sys_platform == "win32"
 winrt-Windows.Foundation>=2.0; sys_platform == "win32"
 winrt-Windows.Foundation.Collections>=2.0; sys_platform == "win32"
+tkinterdnd2>=0.4
