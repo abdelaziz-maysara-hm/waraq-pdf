@@ -13,7 +13,7 @@ DATA = ROOT / "tests" / "data"
 
 @pytest.fixture(scope="session")
 def fx():
-    if not (FIX / "photos_large.pdf").exists():
+    if not (FIX / "photos_large.pdf").exists() or not (FIX / "arabic_book_240p.pdf").exists():
         subprocess.check_call([sys.executable, str(ROOT / "tests" / "make_fixtures.py")])
     return FIX
 

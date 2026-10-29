@@ -20,6 +20,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / "tests"))
 OUT = ROOT / "tests" / "_fixtures"
 DATA = ROOT / "tests" / "data"
 AMIRI = ROOT / "waraq" / "assets" / "fonts" / "Amiri-Regular.ttf"
@@ -231,6 +232,8 @@ def main():
     from waraq.core.pages import rotate
     rotate(OUT / "english_50p.pdf", OUT / "rotated90.pdf", 90, pages="1-3")
     (OUT / "not_a_pdf.pdf").write_bytes(b"hello, I am not a PDF")
+    import make_viewer_fixtures
+    make_viewer_fixtures.main()
     print("chrome:", ok_c, "writer:", ok_w)
     for p in sorted(OUT.rglob("*")):
         if p.is_file():

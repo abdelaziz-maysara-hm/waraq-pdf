@@ -10,7 +10,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
-os.environ.setdefault("XDG_CONFIG_HOME", tempfile.mkdtemp())
+os.environ.setdefault("WARAQ_SETTINGS_DIR", tempfile.mkdtemp())
 
 from PIL import ImageGrab  # noqa: E402
 from pypdf import PdfReader  # noqa: E402
@@ -193,7 +193,7 @@ if __name__ == "__main__":
     run("en")
     # language toggle keeps working
     app = App(lang="en"); app.update(); app.toggle_lang(); app.update()
-    check("toggle to Arabic", app.settings["lang"] == "ar" and app.grid_slaves(column=1))
+    check("toggle to Arabic", app.settings["lang"] == "ar" and app.home.winfo_exists())
     app.destroy()
     bad = [r for r in results if not r[1]]
     print(f"\n{len(results) - len(bad)}/{len(results)} GUI checks passed; screenshots in {SHOTS}")

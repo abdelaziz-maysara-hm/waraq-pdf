@@ -29,3 +29,12 @@ def test_i18n_windows_vs_linux(monkeypatch):
     i18n.set_lang("en")
     assert i18n.t("tool_merge") == "Merge PDFs"
     assert set(k for k in i18n.S) and all(len(v) == 2 and v[0] and v[1] for v in i18n.S.values())
+
+
+@pytest.mark.skipif(sys.platform == "win32" or not shutil.which("xvfb-run"), reason="needs xvfb-run")
+def test_viewer_gui_drive(fx):
+    """Viewer + editor + home screen, driven through the real widgets (tests/gui_viewer_drive.py)."""
+    r = subprocess.run(["xvfb-run", "-a", "-s", "-screen 0 1366x860x24", sys.executable,
+                        str(ROOT / "tests" / "gui_viewer_drive.py")], capture_output=True, text=True, timeout=900)
+    print(r.stdout[-3000:])
+    assert r.returncode == 0, r.stdout[-3000:] + r.stderr[-3000:]
