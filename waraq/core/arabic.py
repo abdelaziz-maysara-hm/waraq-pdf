@@ -350,9 +350,76 @@ def shape_for_display(text: str, base_dir: Optional[str] = None) -> str:
     lines = []
     for line in text.split("\n"):
         if has_arabic(line):
-            line = get_display(reshaper.reshape(line), base_dir=base_dir)
+            fixed = _mark_bracket_pairs(line, base_dir)
+            line = get_display(reshaper.reshape(fixed), base_dir=base_dir)
+            if fixed != line:
+                line = line.replace("\u200e", "").replace("\u200f", "")
         lines.append(line)
     return "\n".join(lines)
+
+
+_OPEN = {"(": ")", "[": "]", "{": "}"}
+
+
+def _strong(ch: str) -> str:
+    if is_arabic_char(ch) and not is_mark(ch) and not ch.isdigit() and unicodedata.category(ch).startswith("L"):
+        return "R"
+    if ch.isalpha():
+        return "L"
+    return ""
+
+
+def _mark_bracket_pairs(line: str, base_dir: Optional[str]) -> str:
+    """Help python-bidi with paired brackets (UBA rule N0, which it lacks).
+
+    "عربي English (test)" must keep "(test)" with the English run.  When
+    the content of a bracket pair is only of the direction opposite to the
+    paragraph and the text before it has that direction too, the brackets
+    take that direction; we make this explicit with LRM/RLM marks.
+    """
+    if not any(c in line for c in _OPEN):
+        return line
+    if base_dir is None:
+        base = "R"
+        for ch in line:
+            s = _strong(ch)
+            if s:
+                base = s
+                break
+    else:
+        base = "R" if str(base_dir).upper().startswith("R") else "L"
+    opp = "L" if base == "R" else "R"
+    mark = "\u200e" if opp == "L" else "\u200f"
+    out = list(line)
+    stack = []
+    pairs = []
+    for i, ch in enumerate(line):
+        if ch in _OPEN:
+            stack.append((i, _OPEN[ch]))
+        elif stack and ch == stack[-1][1]:
+            pairs.append((stack.pop()[0], i))
+    inserts = {}
+    for a, b in pairs:
+        inner = {_strong(c) for c in line[a + 1:b]} - {""}
+        if inner != {opp}:
+            continue
+        before = ""
+        for c in reversed(line[:a]):
+            before = _strong(c)
+            if before:
+                break
+        if before == opp:
+            inserts[a] = inserts.get(a, "") + mark
+            inserts[b + 1] = mark + inserts.get(b + 1, "")
+    if not inserts:
+        return line
+    res = []
+    for i in range(len(out) + 1):
+        if i in inserts:
+            res.append(inserts[i])
+        if i < len(out):
+            res.append(out[i])
+    return "".join(res)
 
 
 _RESHAPER = None
